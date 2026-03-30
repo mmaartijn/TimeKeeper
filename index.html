@@ -15,12 +15,44 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
+            padding: 20px 0;
             color: white;
             image-rendering: pixelated;
         }
 
+        /* ─── Level selector ─── */
+        .level-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .level-btn {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 9px;
+            padding: 8px 12px;
+            border: 4px solid #000;
+            cursor: pointer;
+            background: #505050;
+            color: #aaa;
+            box-shadow: inset -4px -4px 0 #303030, inset 4px 4px 0 #808080;
+            transition: none;
+        }
+
+        .level-btn.active {
+            background: #FFD700;
+            color: #000;
+            box-shadow: inset -4px -4px 0 #CC9900, inset 4px 4px 0 #FFF176;
+        }
+
+        .level-btn:active {
+            box-shadow: none;
+            transform: translate(2px, 2px);
+        }
+
+        /* ─── Inputs ─── */
         .input-group {
             margin-bottom: 20px;
             display: flex;
@@ -45,6 +77,7 @@
             width: 250px;
         }
 
+        /* ─── Stat board ─── */
         .stat-board {
             background: rgba(0, 0, 0, 0.8);
             border: 4px solid #fff;
@@ -65,6 +98,7 @@
             float: right;
         }
 
+        /* ─── Stage / animation ─── */
         .stage {
             position: relative;
             width: 300px;
@@ -97,22 +131,24 @@
             font-weight: bold;
         }
 
+        /* Level 2 question box: red tint */
+        .level2-mode .question-box {
+            background: #FF6B6B;
+            box-shadow: inset -4px -4px 0 #AA0000, inset 4px 4px 0 #FFB3B3;
+        }
+
+        .level2-mode .question-box::after {
+            color: #AA0000;
+        }
+
         .question-box.jump {
             animation: jump 0.2s ease-out;
         }
 
         @keyframes jump {
-            0% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-15px);
-            }
-
-            100% {
-                transform: translateY(0);
-            }
+            0%   { transform: translateY(0); }
+            50%  { transform: translateY(-15px); }
+            100% { transform: translateY(0); }
         }
 
         .mario-pipe {
@@ -152,23 +188,20 @@
             box-shadow: inset -4px 0 0 #CC9900;
         }
 
-        @keyframes fall {
-            0% {
-                transform: translateY(0) scaleX(1);
-                opacity: 1;
-            }
-
-            80% {
-                transform: translateY(220px) scaleX(1);
-                opacity: 1;
-            }
-
-            100% {
-                transform: translateY(220px) scaleX(0);
-                opacity: 0;
-            }
+        /* Level 2 coins are red/euro-coloured */
+        .coin.euro-coin {
+            background: #FF6B6B;
+            box-shadow: inset -4px 0 0 #AA0000;
+            border-color: #AA0000;
         }
 
+        @keyframes fall {
+            0%   { transform: translateY(0) scaleX(1); opacity: 1; }
+            80%  { transform: translateY(220px) scaleX(1); opacity: 1; }
+            100% { transform: translateY(220px) scaleX(0); opacity: 0; }
+        }
+
+        /* ─── Controls ─── */
         #controls button {
             font-family: 'Press Start 2P', cursive;
             padding: 10px 20px;
@@ -192,38 +225,103 @@
 
         #controls button.reset {
             background: #505050;
-            /* Grey for reset */
             box-shadow: inset -4px -4px 0 #303030, inset 4px 4px 0 #808080;
+        }
+
+        /* ─── Hide/show helpers ─── */
+        .level-panel {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .level-panel.visible {
+            display: flex;
         }
     </style>
 </head>
 
 <body>
-    <div class="stat-board">
-        <div class="stat-line">BRUTO: <span id="grossLabel" class="stat-value">€0.00</span></div>
-        <div class="stat-line">NETTO: <span id="netLabel" class="stat-value">€0.00</span></div>
+    <!-- Level selector -->
+    <div class="level-selector">
+        <button class="level-btn active" id="btnLevel1" onclick="switchLevel(1)">LEVEL 1</button>
+        <button class="level-btn"        id="btnLevel2" onclick="switchLevel(2)">LEVEL 2</button>
     </div>
-    <div class="input-group">
-        <label for="salaryInput">Maandelijkse Bruto Salaris</label>
-        <input type="number" id="salaryInput" placeholder="Bruto Salaris (PM)">
-        <label for="hoursInput">Uren per Week</label>
-        <input type="number" id="hoursInput" placeholder="Uren per week">
+
+    <!-- ── LEVEL 1: Salaris tracker ── -->
+    <div class="level-panel visible" id="panel1">
+        <div class="stat-board">
+            <div class="stat-line">BRUTO: <span id="grossLabel" class="stat-value">€0.00</span></div>
+            <div class="stat-line">NETTO: <span id="netLabel"   class="stat-value">€0.00</span></div>
+        </div>
+        <div class="input-group">
+            <label for="salaryInput">Maandelijkse Bruto Salaris</label>
+            <input type="number" id="salaryInput" placeholder="Bruto Salaris (PM)">
+            <label for="hoursInput">Uren per Week</label>
+            <input type="number" id="hoursInput"  placeholder="Uren per week">
+        </div>
     </div>
+
+    <!-- ── LEVEL 2: Vergaderkosten ── -->
+    <div class="level-panel" id="panel2">
+        <div class="stat-board">
+            <div class="stat-line">TIJD:   <span id="meetingTime"  class="stat-value">00:00</span></div>
+            <div class="stat-line">KOSTEN: <span id="meetingCost"  class="stat-value">€0.00</span></div>
+        </div>
+        <div class="input-group">
+            <label for="costPerHourInput">Kosten per collega (per uur)</label>
+            <input type="number" id="costPerHourInput"    placeholder="€ per uur">
+            <label for="participantsInput">Aantal deelnemers</label>
+            <input type="number" id="participantsInput"   placeholder="Deelnemers">
+        </div>
+    </div>
+
+    <!-- Shared animation stage -->
     <div class="stage" id="stage">
         <div class="question-box"></div>
         <div class="mario-pipe"></div>
     </div>
+
     <div id="controls">
         <button onclick="startTracker()">START</button>
-        <button class="stop" onclick="stopTracker()">STOP</button>
+        <button class="stop"  onclick="stopTracker()">STOP</button>
         <button class="reset" onclick="resetTracker()">RESET</button>
     </div>
-    <script>
-        let startTime, intervalId;
-        let grossTotal = 0, netTotal = 0;
-        let isRunning = false;
-        let audioCtx = null;
 
+    <script>
+        // ── State ──────────────────────────────────────────────
+        let intervalId;
+        let isRunning = false;
+        let audioCtx  = null;
+        let currentLevel = 1;
+
+        // Level 1
+        let grossTotal = 0, netTotal = 0;
+
+        // Level 2
+        let meetingSeconds = 0;
+        let meetingCostTotal = 0;
+
+        // ── Level switching ────────────────────────────────────
+        function switchLevel(level) {
+            if (isRunning) stopTracker();
+            resetTracker();
+
+            currentLevel = level;
+
+            document.getElementById('panel1').classList.toggle('visible', level === 1);
+            document.getElementById('panel2').classList.toggle('visible', level === 2);
+            document.getElementById('btnLevel1').classList.toggle('active', level === 1);
+            document.getElementById('btnLevel2').classList.toggle('active', level === 2);
+
+            // Tint the stage for Level 2
+            document.getElementById('stage').classList.toggle('level2-mode', level === 2);
+
+            initAudio();
+            playCoinSound();
+        }
+
+        // ── Audio ──────────────────────────────────────────────
         function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -232,32 +330,28 @@
 
         function playCoinSound() {
             if (!audioCtx) return;
-            const osc = audioCtx.createOscillator();
+            const osc  = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-
             osc.type = 'square';
-            osc.frequency.setValueAtTime(987.77, audioCtx.currentTime); // B5
-            osc.frequency.exponentialRampToValueAtTime(1318.51, audioCtx.currentTime + 0.1); // E6
-
+            osc.frequency.setValueAtTime(987.77,  audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1318.51, audioCtx.currentTime + 0.1);
             gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-
             osc.start();
             osc.stop(audioCtx.currentTime + 0.5);
         }
 
         function playStartSound() {
             if (!audioCtx) return;
-            const osc = audioCtx.createOscillator();
+            const osc  = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'square';
-            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
-            osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
-            osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
-            osc.frequency.setValueAtTime(1046.50, audioCtx.currentTime + 0.3); // C6
+            osc.frequency.setValueAtTime(523.25,  audioCtx.currentTime);
+            osc.frequency.setValueAtTime(659.25,  audioCtx.currentTime + 0.1);
+            osc.frequency.setValueAtTime(783.99,  audioCtx.currentTime + 0.2);
+            osc.frequency.setValueAtTime(1046.50, audioCtx.currentTime + 0.3);
             gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
             osc.connect(gain);
@@ -266,71 +360,9 @@
             osc.stop(audioCtx.currentTime + 0.6);
         }
 
-        const calculateNetRates = (grossMonthly, weeklyHours) => {
-            // 2024 Dutch Tax Simplified (Box 1)
-            const annualGross = grossMonthly * 12;
-            const vakantieGeld = annualGross * 0.08;
-            const totalAnnualGross = annualGross + vakantieGeld;
-
-            // Basic Tax brackets 2024
-            let tax = 0;
-            if (totalAnnualGross <= 75518) {
-                tax = totalAnnualGross * 0.3697;
-            } else {
-                tax = (75518 * 0.3697) + ((totalAnnualGross - 75518) * 0.495);
-            }
-
-            // Simplified credits (Algemene heffingskorting + Arbeidskorting)
-            const credits = 6000; // Rough average estimate
-            const annualNet = Math.max(0, totalAnnualGross - tax + credits);
-
-            const monthlyHours = (weeklyHours * 52) / 12;
-            const workingSecondsPerMonth = monthlyHours * 3600;
-
-            return {
-                grossPerSecond: grossMonthly / workingSecondsPerMonth,
-                netPerSecond: (annualNet / 12) / workingSecondsPerMonth
-            };
-        };
-
-        function startTracker() {
-            if (isRunning) return;
-            initAudio();
-            playStartSound();
-            isRunning = true;
-            console.log("Starting tracker...");
-
-            const grossMonthly = parseFloat(document.getElementById('salaryInput').value) || 0;
-            const weeklyHours = parseFloat(document.getElementById('hoursInput').value) || 40;
-
-            console.log("Gross Monthly: " + grossMonthly);
-            console.log("Weekly Hours: " + weeklyHours);
-
-            const rates = calculateNetRates(grossMonthly, weeklyHours);
-
-            console.log("Gross Per Second: " + rates.grossPerSecond);
-            console.log("Net Per Second: " + rates.netPerSecond);
-
-            let updatesPerSecond = 10;
-
-            intervalId = setInterval(() => {
-                grossTotal += (rates.grossPerSecond / updatesPerSecond);
-                netTotal += (rates.netPerSecond / updatesPerSecond);
-                updateUI();
-            }, 1000 / updatesPerSecond); // Update every 100ms for smoothness
-        }
-
-        function stopTracker() {
-            if (!isRunning) return;
-            isRunning = false;
-            clearInterval(intervalId);
-            playStopSound();
-            console.log("Stopping tracker...");
-        }
-
         function playStopSound() {
             if (!audioCtx) return;
-            const osc = audioCtx.createOscillator();
+            const osc  = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'square';
             osc.frequency.setValueAtTime(440, audioCtx.currentTime);
@@ -343,47 +375,122 @@
             osc.stop(audioCtx.currentTime + 0.3);
         }
 
+        // ── Level 1: Tax calculation ───────────────────────────
+        const calculateNetRates = (grossMonthly, weeklyHours) => {
+            const annualGross      = grossMonthly * 12;
+            const vakantieGeld     = annualGross * 0.08;
+            const totalAnnualGross = annualGross + vakantieGeld;
+
+            let tax = 0;
+            if (totalAnnualGross <= 75518) {
+                tax = totalAnnualGross * 0.3697;
+            } else {
+                tax = (75518 * 0.3697) + ((totalAnnualGross - 75518) * 0.495);
+            }
+
+            const credits  = 6000;
+            const annualNet = Math.max(0, totalAnnualGross - tax + credits);
+
+            const monthlyHours           = (weeklyHours * 52) / 12;
+            const workingSecondsPerMonth = monthlyHours * 3600;
+
+            return {
+                grossPerSecond: grossMonthly / workingSecondsPerMonth,
+                netPerSecond:   (annualNet / 12) / workingSecondsPerMonth
+            };
+        };
+
+        // ── Controls ───────────────────────────────────────────
+        function startTracker() {
+            if (isRunning) return;
+            initAudio();
+            playStartSound();
+            isRunning = true;
+
+            const UPDATES_PER_SEC = 10;
+            const TICK = 1000 / UPDATES_PER_SEC;
+
+            if (currentLevel === 1) {
+                const grossMonthly = parseFloat(document.getElementById('salaryInput').value) || 0;
+                const weeklyHours  = parseFloat(document.getElementById('hoursInput').value)  || 40;
+                const rates        = calculateNetRates(grossMonthly, weeklyHours);
+
+                intervalId = setInterval(() => {
+                    grossTotal += rates.grossPerSecond / UPDATES_PER_SEC;
+                    netTotal   += rates.netPerSecond   / UPDATES_PER_SEC;
+                    updateUI();
+                }, TICK);
+
+            } else {
+                const costPerHour    = parseFloat(document.getElementById('costPerHourInput').value)  || 0;
+                const participants   = parseFloat(document.getElementById('participantsInput').value) || 1;
+                const costPerSecond  = (costPerHour * participants) / 3600;
+
+                intervalId = setInterval(() => {
+                    meetingSeconds   += 1 / UPDATES_PER_SEC;
+                    meetingCostTotal += costPerSecond / UPDATES_PER_SEC;
+                    updateUI();
+                }, TICK);
+            }
+        }
+
+        function stopTracker() {
+            if (!isRunning) return;
+            isRunning = false;
+            clearInterval(intervalId);
+            playStopSound();
+        }
+
         function resetTracker() {
+            // Level 1
             grossTotal = 0;
-            netTotal = 0;
-            updateUI(true); // pass flag to indicate reset
-            console.log("Resetting tracker...");
-            playCoinSound(); // Use coin sound as feedback for reset
+            netTotal   = 0;
+            // Level 2
+            meetingSeconds   = 0;
+            meetingCostTotal = 0;
+            updateUI(true);
+        }
+
+        // ── UI update ──────────────────────────────────────────
+        function formatTime(totalSeconds) {
+            const mins = Math.floor(totalSeconds / 60);
+            const secs = Math.floor(totalSeconds % 60);
+            return String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
         }
 
         function updateUI(isReset = false) {
-            document.getElementById('grossLabel').innerText = `€${grossTotal.toFixed(2)}`;
-            document.getElementById('netLabel').innerText = `€${netTotal.toFixed(2)}`;
+            if (currentLevel === 1) {
+                document.getElementById('grossLabel').innerText = `€${grossTotal.toFixed(2)}`;
+                document.getElementById('netLabel').innerText   = `€${netTotal.toFixed(2)}`;
+            } else {
+                document.getElementById('meetingTime').innerText = formatTime(meetingSeconds);
+                document.getElementById('meetingCost').innerText = `€${meetingCostTotal.toFixed(2)}`;
+            }
 
             if (isReset) return;
 
-            // Randomly spawn coins based on earnings
             if (isRunning && Math.random() > 0.85) {
                 spawnCoin();
             }
         }
 
+        // ── Coin animation ─────────────────────────────────────
         function spawnCoin() {
             const stage = document.getElementById('stage');
-            const box = document.querySelector('.question-box');
+            const box   = document.querySelector('.question-box');
 
-            // Visual feedback - box jump
             box.classList.remove('jump');
-            void box.offsetWidth; // trigger reflow
+            void box.offsetWidth;
             box.classList.add('jump');
 
             initAudio();
             playCoinSound();
 
-            // Create coin
             const coin = document.createElement('div');
-            coin.className = 'coin';
+            coin.className = currentLevel === 2 ? 'coin euro-coin' : 'coin';
             stage.appendChild(coin);
 
-            // Remove coin after animation
-            setTimeout(() => {
-                coin.remove();
-            }, 1000);
+            setTimeout(() => coin.remove(), 1000);
         }
     </script>
 </body>
