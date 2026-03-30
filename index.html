@@ -150,6 +150,10 @@
             background: #FF0000;
             box-shadow: inset -4px -4px 0 #A00000, inset 4px 4px 0 #FF6666;
         }
+        #controls button.reset {
+            background: #505050; /* Grey for reset */
+            box-shadow: inset -4px -4px 0 #303030, inset 4px 4px 0 #808080;
+        }
     </style>
 </head>
 <body>
@@ -159,9 +163,9 @@
     </div>
     <div class="input-group">
         <label for="salaryInput">Maandelijkse Bruto Salaris</label>
-        <input type="number" id="salaryInput" placeholder="Bruto Salaris (PM)" value="3500">
+        <input type="number" id="salaryInput" placeholder="Bruto Salaris (PM)">
         <label for="hoursInput">Uren per Week</label>
-        <input type="number" id="hoursInput" placeholder="Uren per week" value="40">
+        <input type="number" id="hoursInput" placeholder="Uren per week">
     </div>
     <div class="stage" id="stage">
         <div class="question-box"></div>
@@ -170,6 +174,7 @@
     <div id="controls">
         <button onclick="startTracker()">START</button>
         <button class="stop" onclick="stopTracker()">STOP</button>
+        <button class="reset" onclick="resetTracker()">RESET</button>
     </div>
     <script>
         let startTime, intervalId;
@@ -287,12 +292,22 @@
             osc.stop(audioCtx.currentTime + 0.3);
         }
 
-        function updateUI() {
+        function resetTracker() {
+            grossTotal = 0;
+            netTotal = 0;
+            updateUI(true); // pass flag to indicate reset
+            console.log("Resetting tracker...");
+            playCoinSound(); // Use coin sound as feedback for reset
+        }
+
+        function updateUI(isReset = false) {
             document.getElementById('grossLabel').innerText = `€${grossTotal.toFixed(2)}`;
             document.getElementById('netLabel').innerText = `€${netTotal.toFixed(2)}`;
             
+            if (isReset) return;
+
             // Randomly spawn coins based on earnings
-            if (Math.random() > 0.85) {
+            if (isRunning && Math.random() > 0.85) {
                 spawnCoin();
             }
         }
