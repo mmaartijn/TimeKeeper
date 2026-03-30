@@ -94,11 +94,62 @@
         <button onclick="stopTracker()">STOP</button>
     </div>
     <script>
+        let startTime, intervalId;
+        let grossTotal = 0, netTotal = 0;
+        let isRunning = false;
+
+        const calculateNetRates = (grossMonthly, weeklyHours) => {
+            // 2024 Dutch Tax Simplified (Box 1)
+            const annualGross = grossMonthly * 12;
+            const vakantieGeld = annualGross * 0.08;
+            const totalAnnualGross = annualGross + vakantieGeld;
+            
+            // Basic Tax brackets 2024
+            let tax = 0;
+            if (totalAnnualGross <= 75518) {
+                tax = totalAnnualGross * 0.3697;
+            } else {
+                tax = (75518 * 0.3697) + ((totalAnnualGross - 75518) * 0.495);
+            }
+
+            // Simplified credits (Algemene heffingskorting + Arbeidskorting)
+            const credits = 6000; // Rough average estimate
+            const annualNet = Math.max(0, totalAnnualGross - tax + credits);
+            
+            const monthlyHours = (weeklyHours * 52) / 12;
+            const workingSecondsPerMonth = monthlyHours * 3600;
+
+            return {
+                grossPerSecond: grossMonthly / workingSecondsPerMonth,
+                netPerSecond: (annualNet / 12) / workingSecondsPerMonth
+            };
+        };
+
         function startTracker() {
+            if (isRunning) return;
+            isRunning = true;
             console.log("Starting tracker...");
+            
+            const grossMonthly = parseFloat(document.getElementById('salaryInput').value) || 0;
+            const weeklyHours = parseFloat(document.getElementById('hoursInput').value) || 40;
+            const rates = calculateNetRates(grossMonthly, weeklyHours);
+            
+            intervalId = setInterval(() => {
+                grossTotal += rates.grossPerSecond;
+                netTotal += rates.netPerSecond;
+                updateUI();
+            }, 100); // Update every 100ms for smoothness
         }
+
         function stopTracker() {
+            isRunning = false;
+            clearInterval(intervalId);
             console.log("Stopping tracker...");
+        }
+
+        function updateUI() {
+            // We'll add UI elements for these in the next task
+            console.log(`Gross: €${grossTotal.toFixed(4)} | Net: €${netTotal.toFixed(4)}`);
         }
     </script>
 </body>
