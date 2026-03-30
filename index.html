@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro Salary Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #5C94FC; /* Mario Sky Blue */
+            font-family: 'Press Start 2P', cursive;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            color: white;
+            image-rendering: pixelated;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group input {
+            font-family: 'Press Start 2P', cursive;
+            padding: 10px;
+            border: 2px solid #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="input-group">
+        <input type="number" id="salaryInput" placeholder="Bruto Salaris (PM)">
+        <input type="number" id="hoursInput" placeholder="Uren per week" value="40">
+    </div>
+    <div id="controls">
+        <button onclick="startTracker()">START</button>
+        <button onclick="stopTracker()">STOP</button>
+    </div>
+    <script>
+        function startTracker() {
+            console.log("Starting tracker...");
+        }
+        function stopTracker() {
+            console.log("Stopping tracker...");
+        }
+    </script>
+</body>
+</html>
