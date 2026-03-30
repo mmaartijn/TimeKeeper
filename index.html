@@ -314,8 +314,8 @@
             let updatesPerSecond = 10;
 
             intervalId = setInterval(() => {
-                grossTotal += rates.grossPerSecond / updatesPerSecond;
-                netTotal += rates.netPerSecond / updatesPerSecond;
+                grossTotal += (rates.grossPerSecond / updatesPerSecond);
+                netTotal += (rates.netPerSecond / updatesPerSecond);
                 updateUI();
             }, 1000 / updatesPerSecond); // Update every 100ms for smoothness
         }
