@@ -20,12 +20,41 @@
         }
         .input-group {
             margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+        .input-group label {
+            font-size: 10px;
+            text-transform: uppercase;
         }
         .input-group input {
             font-family: 'Press Start 2P', cursive;
-            font-size: 10px;
+            font-size: 14px;
             padding: 10px;
             border: 4px solid #000;
+            background: #fff;
+            color: #000;
+            text-align: center;
+            width: 250px;
+        }
+        .stat-board {
+            background: rgba(0,0,0,0.8);
+            border: 4px solid #fff;
+            padding: 15px;
+            margin-bottom: 20px;
+            width: 280px;
+            text-align: left;
+        }
+        .stat-line {
+            font-size: 10px;
+            margin: 5px 0;
+            line-height: 1.5;
+        }
+        .stat-value {
+            color: #FFD700;
+            float: right;
         }
         .stage {
             position: relative;
@@ -56,6 +85,14 @@
             color: #CC9900;
             font-weight: bold;
         }
+        .question-box.jump {
+            animation: jump 0.2s ease-out;
+        }
+        @keyframes jump {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0); }
+        }
         .mario-pipe {
             width: 80px;
             height: 100px;
@@ -78,25 +115,109 @@
             border: 4px solid #000;
             box-shadow: inset -10px 0 0 #2A7B2E, inset 10px 0 0 #76D67B;
         }
+        .coin {
+            width: 20px;
+            height: 30px;
+            background: #FFD700;
+            border: 3px solid #000;
+            position: absolute;
+            left: 140px;
+            top: 55px;
+            z-index: 0;
+            animation: fall 1s cubic-bezier(0.5, 0, 1, 0.5) forwards;
+            box-shadow: inset -4px 0 0 #CC9900;
+        }
+        @keyframes fall {
+            0% { transform: translateY(0) scaleX(1); opacity: 1; }
+            80% { transform: translateY(220px) scaleX(1); opacity: 1; }
+            100% { transform: translateY(220px) scaleX(0); opacity: 0; }
+        }
+        #controls button {
+            font-family: 'Press Start 2P', cursive;
+            padding: 10px 20px;
+            margin: 0 10px;
+            border: 4px solid #000;
+            background: #43B047;
+            color: white;
+            cursor: pointer;
+            box-shadow: inset -4px -4px 0 #2A7B2E, inset 4px 4px 0 #76D67B;
+        }
+        #controls button:active {
+            box-shadow: none;
+            transform: translate(2px, 2px);
+        }
+        #controls button.stop {
+            background: #FF0000;
+            box-shadow: inset -4px -4px 0 #A00000, inset 4px 4px 0 #FF6666;
+        }
     </style>
 </head>
 <body>
+    <div class="stat-board">
+        <div class="stat-line">BRUTO: <span id="grossLabel" class="stat-value">€0.00</span></div>
+        <div class="stat-line">NETTO: <span id="netLabel" class="stat-value">€0.00</span></div>
+    </div>
     <div class="input-group">
+        <label for="salaryInput">Maandelijkse Bruto Salaris</label>
         <input type="number" id="salaryInput" placeholder="Bruto Salaris (PM)" value="3500">
+        <label for="hoursInput">Uren per Week</label>
         <input type="number" id="hoursInput" placeholder="Uren per week" value="40">
     </div>
-    <div class="stage">
+    <div class="stage" id="stage">
         <div class="question-box"></div>
         <div class="mario-pipe"></div>
     </div>
     <div id="controls">
         <button onclick="startTracker()">START</button>
-        <button onclick="stopTracker()">STOP</button>
+        <button class="stop" onclick="stopTracker()">STOP</button>
     </div>
     <script>
         let startTime, intervalId;
         let grossTotal = 0, netTotal = 0;
         let isRunning = false;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playCoinSound() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(987.77, audioCtx.currentTime); // B5
+            osc.frequency.exponentialRampToValueAtTime(1318.51, audioCtx.currentTime + 0.1); // E6
+            
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.5);
+        }
+
+        function playStartSound() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+            osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+            osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
+            osc.frequency.setValueAtTime(1046.50, audioCtx.currentTime + 0.3); // C6
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.6);
+        }
 
         const calculateNetRates = (grossMonthly, weeklyHours) => {
             // 2024 Dutch Tax Simplified (Box 1)
@@ -127,6 +248,8 @@
 
         function startTracker() {
             if (isRunning) return;
+            initAudio();
+            playStartSound();
             isRunning = true;
             console.log("Starting tracker...");
             
@@ -142,14 +265,59 @@
         }
 
         function stopTracker() {
+            if (!isRunning) return;
             isRunning = false;
             clearInterval(intervalId);
+            playStopSound();
             console.log("Stopping tracker...");
         }
 
+        function playStopSound() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(440, audioCtx.currentTime); 
+            osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.3); 
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+        }
+
         function updateUI() {
-            // We'll add UI elements for these in the next task
-            console.log(`Gross: €${grossTotal.toFixed(4)} | Net: €${netTotal.toFixed(4)}`);
+            document.getElementById('grossLabel').innerText = `€${grossTotal.toFixed(2)}`;
+            document.getElementById('netLabel').innerText = `€${netTotal.toFixed(2)}`;
+            
+            // Randomly spawn coins based on earnings
+            if (Math.random() > 0.85) {
+                spawnCoin();
+            }
+        }
+
+        function spawnCoin() {
+            const stage = document.getElementById('stage');
+            const box = document.querySelector('.question-box');
+            
+            // Visual feedback - box jump
+            box.classList.remove('jump');
+            void box.offsetWidth; // trigger reflow
+            box.classList.add('jump');
+            
+            initAudio();
+            playCoinSound();
+
+            // Create coin
+            const coin = document.createElement('div');
+            coin.className = 'coin';
+            stage.appendChild(coin);
+
+            // Remove coin after animation
+            setTimeout(() => {
+                coin.remove();
+            }, 1000);
         }
     </script>
 </body>
