@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="nl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         body {
-            background-color: #5C94FC; /* Mario Sky Blue */
+            background-color: #5C94FC;
+            /* Mario Sky Blue */
             font-family: 'Press Start 2P', cursive;
             display: flex;
             flex-direction: column;
@@ -18,6 +20,7 @@
             color: white;
             image-rendering: pixelated;
         }
+
         .input-group {
             margin-bottom: 20px;
             display: flex;
@@ -25,10 +28,12 @@
             gap: 10px;
             align-items: center;
         }
+
         .input-group label {
             font-size: 10px;
             text-transform: uppercase;
         }
+
         .input-group input {
             font-family: 'Press Start 2P', cursive;
             font-size: 14px;
@@ -39,23 +44,27 @@
             text-align: center;
             width: 250px;
         }
+
         .stat-board {
-            background: rgba(0,0,0,0.8);
+            background: rgba(0, 0, 0, 0.8);
             border: 4px solid #fff;
             padding: 15px;
             margin-bottom: 20px;
             width: 280px;
             text-align: left;
         }
+
         .stat-line {
             font-size: 10px;
             margin: 5px 0;
             line-height: 1.5;
         }
+
         .stat-value {
             color: #FFD700;
             float: right;
         }
+
         .stage {
             position: relative;
             width: 300px;
@@ -64,6 +73,7 @@
             overflow: hidden;
             margin: 20px 0;
         }
+
         .question-box {
             width: 50px;
             height: 50px;
@@ -80,19 +90,31 @@
             z-index: 2;
             box-shadow: inset -4px -4px 0 #CC9900, inset 4px 4px 0 #FFF;
         }
+
         .question-box::after {
             content: "?";
             color: #CC9900;
             font-weight: bold;
         }
+
         .question-box.jump {
             animation: jump 0.2s ease-out;
         }
+
         @keyframes jump {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
-            100% { transform: translateY(0); }
+            0% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+
+            100% {
+                transform: translateY(0);
+            }
         }
+
         .mario-pipe {
             width: 80px;
             height: 100px;
@@ -104,6 +126,7 @@
             z-index: 1;
             box-shadow: inset -10px 0 0 #2A7B2E, inset 10px 0 0 #76D67B;
         }
+
         .mario-pipe::before {
             content: "";
             position: absolute;
@@ -115,6 +138,7 @@
             border: 4px solid #000;
             box-shadow: inset -10px 0 0 #2A7B2E, inset 10px 0 0 #76D67B;
         }
+
         .coin {
             width: 20px;
             height: 30px;
@@ -127,11 +151,24 @@
             animation: fall 1s cubic-bezier(0.5, 0, 1, 0.5) forwards;
             box-shadow: inset -4px 0 0 #CC9900;
         }
+
         @keyframes fall {
-            0% { transform: translateY(0) scaleX(1); opacity: 1; }
-            80% { transform: translateY(220px) scaleX(1); opacity: 1; }
-            100% { transform: translateY(220px) scaleX(0); opacity: 0; }
+            0% {
+                transform: translateY(0) scaleX(1);
+                opacity: 1;
+            }
+
+            80% {
+                transform: translateY(220px) scaleX(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(220px) scaleX(0);
+                opacity: 0;
+            }
         }
+
         #controls button {
             font-family: 'Press Start 2P', cursive;
             padding: 10px 20px;
@@ -142,20 +179,25 @@
             cursor: pointer;
             box-shadow: inset -4px -4px 0 #2A7B2E, inset 4px 4px 0 #76D67B;
         }
+
         #controls button:active {
             box-shadow: none;
             transform: translate(2px, 2px);
         }
+
         #controls button.stop {
             background: #FF0000;
             box-shadow: inset -4px -4px 0 #A00000, inset 4px 4px 0 #FF6666;
         }
+
         #controls button.reset {
-            background: #505050; /* Grey for reset */
+            background: #505050;
+            /* Grey for reset */
             box-shadow: inset -4px -4px 0 #303030, inset 4px 4px 0 #808080;
         }
     </style>
 </head>
+
 <body>
     <div class="stat-board">
         <div class="stat-line">BRUTO: <span id="grossLabel" class="stat-value">€0.00</span></div>
@@ -192,17 +234,17 @@
             if (!audioCtx) return;
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            
+
             osc.type = 'square';
             osc.frequency.setValueAtTime(987.77, audioCtx.currentTime); // B5
             osc.frequency.exponentialRampToValueAtTime(1318.51, audioCtx.currentTime + 0.1); // E6
-            
+
             gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-            
+
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-            
+
             osc.start();
             osc.stop(audioCtx.currentTime + 0.5);
         }
@@ -229,7 +271,7 @@
             const annualGross = grossMonthly * 12;
             const vakantieGeld = annualGross * 0.08;
             const totalAnnualGross = annualGross + vakantieGeld;
-            
+
             // Basic Tax brackets 2024
             let tax = 0;
             if (totalAnnualGross <= 75518) {
@@ -241,7 +283,7 @@
             // Simplified credits (Algemene heffingskorting + Arbeidskorting)
             const credits = 6000; // Rough average estimate
             const annualNet = Math.max(0, totalAnnualGross - tax + credits);
-            
+
             const monthlyHours = (weeklyHours * 52) / 12;
             const workingSecondsPerMonth = monthlyHours * 3600;
 
@@ -257,16 +299,25 @@
             playStartSound();
             isRunning = true;
             console.log("Starting tracker...");
-            
+
             const grossMonthly = parseFloat(document.getElementById('salaryInput').value) || 0;
             const weeklyHours = parseFloat(document.getElementById('hoursInput').value) || 40;
+
+            console.log("Gross Monthly: " + grossMonthly);
+            console.log("Weekly Hours: " + weeklyHours);
+
             const rates = calculateNetRates(grossMonthly, weeklyHours);
-            
+
+            console.log("Gross Per Second: " + rates.grossPerSecond);
+            console.log("Net Per Second: " + rates.netPerSecond);
+
+            let updatesPerSecond = 10;
+
             intervalId = setInterval(() => {
-                grossTotal += rates.grossPerSecond;
-                netTotal += rates.netPerSecond;
+                grossTotal += rates.grossPerSecond / updatesPerSecond;
+                netTotal += rates.netPerSecond / updatesPerSecond;
                 updateUI();
-            }, 100); // Update every 100ms for smoothness
+            }, 1000 / updatesPerSecond); // Update every 100ms for smoothness
         }
 
         function stopTracker() {
@@ -282,8 +333,8 @@
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'square';
-            osc.frequency.setValueAtTime(440, audioCtx.currentTime); 
-            osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.3); 
+            osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.3);
             gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
             osc.connect(gain);
@@ -303,7 +354,7 @@
         function updateUI(isReset = false) {
             document.getElementById('grossLabel').innerText = `€${grossTotal.toFixed(2)}`;
             document.getElementById('netLabel').innerText = `€${netTotal.toFixed(2)}`;
-            
+
             if (isReset) return;
 
             // Randomly spawn coins based on earnings
@@ -315,12 +366,12 @@
         function spawnCoin() {
             const stage = document.getElementById('stage');
             const box = document.querySelector('.question-box');
-            
+
             // Visual feedback - box jump
             box.classList.remove('jump');
             void box.offsetWidth; // trigger reflow
             box.classList.add('jump');
-            
+
             initAudio();
             playCoinSound();
 
@@ -336,4 +387,5 @@
         }
     </script>
 </body>
+
 </html>
